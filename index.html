@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBM // Offensive Security HQ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap');
+:root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e26;--bg4:#222733;--border:#2a2f3d;--border2:#353c50;--text:#e2e6f0;--muted:#6b7590;--dim:#3d4460;--green:#39d98a;--green2:#1a6640;--green3:#0d3322;--amber:#f0a500;--amber2:#7a5200;--amber3:#3d2900;--red:#f05252;--red2:#7a2020;--red3:#3d1010;--blue:#5b8df0;--blue2:#1e3a7a;--blue3:#0d1e3d;--purple:#9b6dff;--purple2:#4a2a99;--purple3:#221040;--teal:#2dd4bf;--teal2:#0d5248;--teal3:#061f1c;--accent:#39d98a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:2rem;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);padding:1rem 0;letter-spacing:.05em;white-space:nowrap}
+.logo span{color:var(--muted);font-weight:400}
+.nav{display:flex;gap:0;flex:1;overflow-x:auto}
+.nav-btn{background:none;border:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;padding:1rem 1.1rem;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.page{display:none;padding:2rem;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+.page-title{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.page-title .prompt{color:var(--accent)}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:2rem}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem}
+.card+.card{margin-top:1rem}
+.card-title{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1rem}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+.tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;margin:2px}
+.tag-green{background:var(--green3);color:var(--green);border:1px solid var(--green2)}
+.tag-amber{background:var(--amber3);color:var(--amber);border:1px solid var(--amber2)}
+.tag-red{background:var(--red3);color:var(--red);border:1px solid var(--red2)}
+.tag-blue{background:var(--blue3);color:var(--blue);border:1px solid var(--blue2)}
+.tag-purple{background:var(--purple3);color:var(--purple);border:1px solid var(--purple2)}
+.tag-teal{background:var(--teal3);color:var(--teal);border:1px solid var(--teal2)}
+.tag-dim{background:var(--bg4);color:var(--muted);border:1px solid var(--border)}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);cursor:pointer;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--bg4);border-color:var(--muted)}
+.btn-accent{background:var(--green3);border-color:var(--green2);color:var(--green)}
+.btn-accent:hover{background:var(--green2)}
+.btn-red{background:var(--red3);border-color:var(--red2);color:var(--red)}
+.btn-blue{background:var(--blue3);border-color:var(--blue2);color:var(--blue)}
+input[type=text],input[type=url],textarea,select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:8px 12px;width:100%;outline:none;transition:border-color .15s}
+input[type=text]:focus,input[type=url]:focus,textarea:focus,select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+select option{background:var(--bg3)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;margin-top:12px}
+.progress-track{height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:3px;background:var(--accent);transition:width .4s ease}
+.phase-item{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.phase-item.active-phase{border-color:var(--green2)}
+.phase-head{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;background:var(--bg2);transition:background .15s}
+.phase-head:hover{background:var(--bg3)}
+.phase-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.phase-name{flex:1;font-size:14px;font-weight:500}
+.phase-meta{font-size:12px;color:var(--muted)}
+.phase-chevron{color:var(--muted);font-size:18px;transition:transform .2s}
+.phase-body{display:none;padding:16px 18px;background:var(--bg);border-top:1px solid var(--border)}
+.phase-body.open{display:block}
+.phase-section{margin-bottom:14px}
+.phase-section-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.checklist{list-style:none}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}
+.checklist li:last-child{border-bottom:none}
+.checklist input[type=checkbox]{margin-top:2px;flex-shrink:0;accent-color:var(--accent);cursor:pointer;width:15px;height:15px}
+.checklist li.done span{color:var(--muted);text-decoration:line-through}
+.tip-box{background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;font-size:12px;color:var(--muted);line-height:1.7;margin-top:12px}
+.badge-current{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--green3);color:var(--green);border:1px solid var(--green2);vertical-align:middle;margin-left:6px}
+
+/* POC IDEAS */
+.poc-idea-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;transition:border-color .15s}
+.poc-idea-card:hover{border-color:var(--border2)}
+.poc-idea-card.tier1{border-left:3px solid var(--green)}
+.poc-idea-card.tier2{border-left:3px solid var(--amber)}
+.poc-idea-card.tier3{border-left:3px solid var(--purple)}
+.poc-idea-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px}
+.poc-idea-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);min-width:28px;padding-top:1px}
+.poc-idea-title{font-size:15px;font-weight:600;flex:1}
+.poc-idea-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px;margin-left:40px}
+.poc-idea-meta{display:flex;flex-wrap:wrap;gap:6px;margin-left:40px;margin-bottom:10px}
+.poc-idea-actions{margin-left:40px;display:flex;gap:8px;flex-wrap:wrap}
+.impact-stars{color:var(--amber);font-size:13px;letter-spacing:1px}
+.difficulty-bar{display:flex;gap:3px;align-items:center}
+.diff-dot{width:8px;height:8px;border-radius:50%;background:var(--border2)}
+.diff-dot.filled{background:var(--blue)}
+.readme-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin-top:10px;display:none;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.readme-box.open{display:block}
+
+/* POC TRACKER */
+.poc-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;position:relative}
+.poc-card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.poc-title{font-size:15px;font-weight:500;flex:1}
+.poc-desc{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6}
+.poc-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.poc-actions{display:flex;gap:6px;margin-top:10px}
+.poc-delete{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;border-radius:4px}
+.poc-delete:hover{color:var(--red);background:var(--red3)}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:13px}
+.empty-state .icon{font-size:36px;margin-bottom:8px}
+
+/* LINKS */
+.link-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.link-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;text-decoration:none;color:var(--text);display:block;transition:border-color .15s,background .15s}
+.link-card:hover{border-color:var(--accent);background:var(--bg3)}
+.link-icon{font-size:22px;margin-bottom:8px}
+.link-name{font-size:13px;font-weight:500;margin-bottom:3px}
+.link-desc{font-size:11px;color:var(--muted)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:1.75rem;width:520px;max-width:95vw;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+hr.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* INTERVIEW PREP */
+.qa-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+.qa-q{padding:14px 18px;cursor:pointer;font-size:13px;font-weight:500;display:flex;justify-content:space-between;gap:10px;align-items:center;transition:background .15s}
+.qa-q:hover{background:var(--bg3)}
+.qa-a{display:none;padding:14px 18px;font-size:13px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);background:var(--bg)}
+.qa-a.open{display:block}
+.qa-a code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--teal)}
+
+/* OVERLEAF NOTE */
+.overleaf-note{background:var(--blue3);border:1px solid var(--blue2);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--blue);margin-bottom:1rem;line-height:1.7}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">BBM<span>::</span>SECURITY<span>_</span>HQ</div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goto('roadmap',this)">Roadmap</button>
+    <button class="nav-btn" onclick="goto('ideas',this)">PoC Ideas</button>
+    <button class="nav-btn" onclick="goto('poc',this)">My Projects</button>
+    <button class="nav-btn" onclick="goto('interview',this)">Interview Prep</button>
+    <button class="nav-btn" onclick="goto('links',this)">Resources</button>
+  </nav>
+</div>
+
+<!-- ══════════════ ROADMAP ══════════════ -->
+<div id="page-roadmap" class="page active">
+  <div class="page-title"><span class="prompt">~/</span> 6-Month Offensive Security Roadmap</div>
+  <div class="page-sub">Bibhuti Bhusan Majhi · Capgemini (Bengaluru) · Target: Junior Pentester / AppSec Engineer</div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="stat-val" id="stat-done">0</div><div class="stat-label">Tasks done</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-label">Total tasks</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-pct">0%</div><div class="stat-label">Overall progress</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-phase">M1</div><div class="stat-label">Current phase</div></div>
+  </div>
+  <div id="phases-container"></div>
+</div>
+
+<!-- ══════════════ POC IDEAS ══════════════ -->
+<div id="page-ideas" class="page">
+  <div class="page-title"><span class="prompt">~/</span> PoC &amp; Project Ideas</div>
+  <div class="page-sub">Curated projects that signal real offensive security skill to hiring managers — ordered by impact and buildability</div>
+
+  <div style="display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center">
+    <span style="font-size:12px;color:var(--muted)">Filter:</span>
+    <button class="btn btn-accent" onclick="filterIdeas('all',this)" id="fi-all">All</button>
+    <button class="btn" onclick="filterIdeas('tier1',this)" id="fi-tier1">🟢 Tier 1 — Build now</button>
+    <button class="btn" onclick="filterIdeas('tier2',this)" id="fi-tier2">🟡 Tier 2 — M3–4</button>
+    <button class="btn" onclick="filterIdeas('tier3',this)" id="fi-tier3">🟣 Tier 3 — M5–6</button>
+  </div>
+
+  <div id="ideas-list"></div>
+</div>
+
+<!-- ══════════════ MY PROJECTS ══════════════ -->
+<div id="page-poc" class="page">
+  <div class="page-title"><span class="prompt">~/</span> My Projects &amp; PoCs</div>
+  <div class="page-sub">Every project you add here is a portfolio artifact. Done ones sync to your resume LaTeX export.</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-accent" onclick="filterPoc('all')" id="f-all">All</button>
+      <button class="btn" onclick="filterPoc('in-progress')" id="f-in-progress">In progress</button>
+      <button class="btn" onclick="filterPoc('done')" id="f-done">Done</button>
+      <button class="btn" onclick="filterPoc('published')" id="f-published">Published</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-blue" onclick="exportLatex()">⬇ Export LaTeX (Overleaf)</button>
+      <button class="btn btn-accent" onclick="openPocModal()">+ Add project</button>
+    </div>
+  </div>
+  <div id="poc-list"></div>
+</div>
+
+<!-- ══════════════ INTERVIEW PREP ══════════════ -->
+<div id="page-interview" class="page">
+  <div class="page-title"><span class="prompt">~/</span> Interview Prep</div>
+  <div class="page-sub">Most common questions for junior pentester / AppSec roles in India — click to reveal model answers</div>
+
+  <div style="display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap">
+    <button class="btn btn-accent" onclick="filterQA('all',this)">All</button>
+    <button class="btn" onclick="filterQA('web',this)">Web / AppSec</button>
+    <button class="btn" onclick="filterQA('network',this)">Network</button>
+    <button class="btn" onclick="filterQA('concepts',this)">Core concepts</button>
+    <button class="btn" onclick="filterQA('tools',this)">Tools</button>
+    <button class="btn" onclick="filterQA('behavioral',this)">Behavioral</button>
+  </div>
+  <div id="qa-list"></div>
+</div>
+
+<!-- ══════════════ RESOURCES ══════════════ -->
+<div id="page-links" class="page">
+  <div class="page-title"><span class="prompt">~/</span> Resources</div>
+  <div class="page-sub">Everything bookmarked in one place</div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title">🎓 Certs &amp; Courses</div>
+    <div class="link-grid" style="margin-top:.5rem">
+      <a class="link-card" href="https://security.ine.com/certifications/ejpt-certification/" target="_blank"><div class="link-icon">🎯</div><div class="link-name">eJPT – INE Security</div><div class="link-desc">Finish this first</div></a>
+      <a class="link-card" href="https://portswigger.net/web-security" target="_blank"><div class="link-icon">🔬</div><div class="link-name">PortSwigger Web Academy</div><div class="link-desc">Best free web vuln labs</div></a>
+      <a class="link-card" href="https://www.udemy.com/course/practical-ethical-hacking/" target="_blank"><div class="link-icon">💻</div><div class="link-name">TCM: Practical Ethical Hacking</div><div class="link-desc">Udemy Pro — use free</div></a>
+      <a class="link-card" href="https://www.udemy.com/course/web-security/" target="_blank"><div class="link-icon">🌐</div><div class="link-name">TCM: Web App Pentesting</div><div class="link-desc">Udemy Pro — use free</div></a>
+      <a class="link-card" href="https://www.offensive-security.com/pwk-oscp/" target="_blank"><div class="link-icon">🏆</div><div class="link-name">OSCP – OffSec</div><div class="link-desc">End goal cert</div></a>
+      <a class="link-card" href="https://www.udemy.com/course/certified-ethical-hacking-v12/" target="_blank"><div class="link-icon">📋</div><div class="link-name">CEH Prep – Udemy</div><div class="link-desc">Indian JD filter cert</div></a>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title">🧪 Practice Platforms</div>
+    <div class="link-grid" style="margin-top:.5rem">
+      <a class="link-card" href="https://tryhackme.com/path/outline/jrpenetrationtester" target="_blank"><div class="link-icon">🚩</div><div class="link-name">TryHackMe – Jr Pentester Path</div><div class="link-desc">Complete this path first</div></a>
+      <a class="link-card" href="https://app.hackthebox.com/" target="_blank"><div class="link-icon">📦</div><div class="link-name">HackTheBox</div><div class="link-desc">Target: 20 machines by M5</div></a>
+      <a class="link-card" href="https://ctftime.org/" target="_blank"><div class="link-icon">⏱</div><div class="link-name">CTFtime</div><div class="link-desc">Upcoming CTF events</div></a>
+      <a class="link-card" href="https://www.vulnhub.com/" target="_blank"><div class="link-icon">🖥</div><div class="link-name">VulnHub</div><div class="link-desc">Offline VM targets</div></a>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title">💰 Bug Bounty</div>
+    <div class="link-grid" style="margin-top:.5rem">
+      <a class="link-card" href="https://hackerone.com/opportunities/all/search?orderBy=Newest&inviteOnly=false&managedProgram=false" target="_blank"><div class="link-icon">🐛</div><div class="link-name">HackerOne – VDP Programs</div><div class="link-desc">Start here — no invite needed</div></a>
+      <a class="link-card" href="https://bugcrowd.com/programs" target="_blank"><div class="link-icon">🕷</div><div class="link-name">Bugcrowd</div><div class="link-desc">Alternative platform</div></a>
+      <a class="link-card" href="https://www.intigriti.com/" target="_blank"><div class="link-icon">🔍</div><div class="link-name">Intigriti</div><div class="link-desc">Less competition than H1</div></a>
+      <a class="link-card" href="https://www.cvedetails.com/" target="_blank"><div class="link-icon">📊</div><div class="link-name">CVEdetails</div><div class="link-desc">Find CVEs to reproduce</div></a>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">✍️ Publish &amp; Share</div>
+    <div class="link-grid" style="margin-top:.5rem">
+      <a class="link-card" href="https://medium.com/" target="_blank"><div class="link-icon">📝</div><div class="link-name">Medium</div><div class="link-desc">Write HTB writeups here</div></a>
+      <a class="link-card" href="https://github.com/" target="_blank"><div class="link-icon">🐙</div><div class="link-name">GitHub</div><div class="link-desc">All tools and report templates</div></a>
+      <a class="link-card" href="https://www.overleaf.com/" target="_blank"><div class="link-icon">📄</div><div class="link-name">Overleaf</div><div class="link-desc">Your LaTeX resume</div></a>
+      <a class="link-card" href="https://www.notion.so/" target="_blank"><div class="link-icon">📓</div><div class="link-name">Notion</div><div class="link-desc">Private pentest notes</div></a>
+    </div>
+  </div>
+</div>
+
+<!-- PoC Modal -->
+<div class="modal-overlay" id="poc-modal">
+  <div class="modal">
+    <div class="modal-title">Add / Edit Project</div>
+    <input type="hidden" id="poc-edit-id">
+    <label>Project name *</label>
+    <input type="text" id="poc-name" placeholder="e.g. AutoRecon-Lite">
+    <label>Type</label>
+    <select id="poc-type">
+      <option value="tool">Tool / Script</option>
+      <option value="webapp">Web App / Backend</option>
+      <option value="lab">Lab / HTB / THM</option>
+      <option value="bounty">Bug Bounty Finding</option>
+      <option value="report">Pentest Report</option>
+      <option value="research">Research / Writeup</option>
+      <option value="cve">CVE Reproduction</option>
+    </select>
+    <label>Status</label>
+    <select id="poc-status">
+      <option value="in-progress">In progress</option>
+      <option value="done">Done</option>
+      <option value="published">Published / Submitted</option>
+    </select>
+    <label>Description — lead with impact, not just what it does</label>
+    <textarea id="poc-desc" placeholder="e.g. Automated recon pipeline reducing manual discovery time by 80%. Chains Nmap → Gobuster → Nikto and outputs structured markdown report."></textarea>
+    <label>Tech / Tools used</label>
+    <input type="text" id="poc-tech" placeholder="e.g. Python, Burp Suite, Nmap">
+    <label>GitHub / Write-up URL (optional)</label>
+    <input type="url" id="poc-link" placeholder="https://github.com/...">
+    <div class="modal-footer">
+      <button class="btn" onclick="closePocModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="savePoc()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── ROADMAP DATA ──────────────────────────
+const PHASES=[{id:'m12',label:'M1–2',color:'#1e3a7a',textColor:'#5b8df0',name:'Lock in eJPT + first real PoC',sub:'Foundation → credential → first visible artifact',current:true,sections:[{label:'Certs (Udemy Pro — free for you)',items:['Finish eJPT exam and get certified','TCM Security: Practical Ethical Hacking (Udemy)','Tib3rius: Web App Pentesting (Udemy)']},{label:'Platform grind',items:['TryHackMe — complete Jr Penetration Tester learning path','HackTheBox — complete first 3 Easy machines','TryHackMe — reach Top 10% ranking']},{label:'PoC for Capgemini (use benched time)',items:['Network recon lab: Nmap + NSE scripts + documented report','Shhlert v2: add alert triage + deduplication metrics','Write a 1-page professional PoC report on each project','Build AutoRecon-Lite (see PoC Ideas tab)']},{label:'Resume + LinkedIn',items:['Add Capgemini as experience — frame benched time as building PoCs','Add eJPT to resume and LinkedIn once passed','Update LinkedIn headline: Offensive Security | Penetration Testing','Rewrite Shhlert project with impact metrics (not just what you built)','Start Overleaf LaTeX resume — offensive security focused']}],tip:'Your Shhlert project on the resume is too vague. Rewrite it: "Reduced alert noise by X% across Y devices via Python syslog deduplication — correlates root-cause events across 100+ log sources." Numbers beat descriptions every time.'},{id:'m34',label:'M3–4',color:'#0d3322',textColor:'#39d98a',name:'Web app pentesting + bug bounty entry',sub:'Switch from labs to real targets — first real findings',sections:[{label:'Certs',items:['PortSwigger Web Academy — all Apprentice + Practitioner labs','TCM: Practical Web App Security and Testing (Udemy)']},{label:'Platform grind',items:['HackTheBox — 5 more Easy + first Medium machine','HackerOne — sign up and pick 3 VDP programs (no invite needed)','Bugcrowd — submit at least 1 vulnerability report any severity','Participate in 1 online CTF (CTFtime.org)']},{label:'PoC / Projects (see Ideas tab)',items:['Build CORS Misconfiguration Scanner (Python)','Build JWT Attack Toolkit','Build Subdomain Takeover Finder','Write full pentest report on a HTB machine (PDF, CVSS scores)','Set up home lab: Kali + Metasploitable + DVWA + Burp Suite']},{label:'Resume + LinkedIn',items:['Add Bug Bounty section — even 1 valid finding changes perception','Push pentest report template publicly on GitHub','Publish first Medium writeup (HTB machine walkthrough)','Connect with 20+ security engineers per week on LinkedIn']}],tip:'HackerOne VDPs (vulnerability disclosure programs) have no bounty but almost no competition. Hunt for IDOR, SSRF, and CORS misconfigs — these three are the most hireable findings on a junior resume because they prove you understand business logic, not just scanner output.'},{id:'m5',label:'M5',color:'#3d2900',textColor:'#f0a500',name:'CEH + credibility sprint',sub:'Cert momentum + public presence = recruiter visibility',sections:[{label:'Certs',items:['CEH — begin prep with EC-Council Udemy course','Register for CEH exam (book the date — creates urgency)','OSCP prep — start PWK labs if budget allows']},{label:'Platform grind',items:['HackTheBox — reach 20+ machines total','Participate in at least 1 CTF','Build SSRF Probe tool or Vulnerable Flask App (see Ideas tab)']},{label:'Publish',items:['First pentest writeup on Medium — full HTB machine walkthrough','Push custom recon script to GitHub with clean README','Post HTB/THM stats publicly on LinkedIn','Write 1 LinkedIn post on a vulnerability you researched']},{label:'Resume actions',items:['Dedicate a Tools section: Burp Suite, Nmap, Metasploit, Wireshark, FFUF','Add platforms section with HTB/THM profile links','Get resume reviewed by a security professional on LinkedIn']}],tip:'CEH opens doors in India — many JDs require it. But OSCP is what makes senior engineers respect you. The PWK labs alone are transformative. If budget is a constraint, start OSCP prep while sitting CEH exam.'},{id:'m6',label:'M6',color:'#3d1010',textColor:'#f05252',name:'Job switch sprint',sub:'Portfolio complete — apply aggressively',sections:[{label:'Target roles',items:['Junior Penetration Tester','Vulnerability Analyst / Security Analyst','Application Security Engineer','Security Researcher (bug bounty focused)']},{label:'Target companies (India)',items:['KPMG Cyber — strong pentest team','Deloitte USI — large security practice','NotSoSecure — boutique pentest, great for learning','Appsecco — India-based offensive security firm','BugBase — Indian bug bounty platform','Razorpay / Flipkart / Zepto — internal security teams']},{label:'Portfolio checklist — must have all',items:['3+ public security tools / scripts on GitHub','1 public pentest report (redacted HTB machine)','1 bug bounty finding — even low severity','eJPT certified, CEH in progress or certified','HTB / TryHackMe profile link on resume','1 published writeup on Medium or personal blog']},{label:'Final actions',items:['Impact-metric rewrite on every resume bullet','Tailored cover letter per company — reference their products','Apply to 5–10 roles per week — volume matters at junior level','Prepare 3 portfolio projects to demo in interviews']}],tip:'At this point your resume tells a story: fresher network analyst → builds security tools → finds real vulnerabilities → writes reports. That arc is what gets you interviews. The portfolio proves capability; the certs just open the door.'}];
+
+// ─── POC IDEAS DATA ────────────────────────
+const IDEAS=[
+  {id:'autorecon',tier:'tier1',name:'AutoRecon-Lite',impact:5,difficulty:2,time:'1–2 weeks',tags:['Python','Nmap','Gobuster','Nikto'],type:'tool',
+  desc:'A recon pipeline that chains Nmap → Gobuster → Nikto automatically, parses outputs, and generates a structured Markdown report with open ports, services, directories, and vulnerabilities. Every pentester needs recon automation. Building your own shows methodology understanding — not just tool usage.',
+  why:'Interviewers love this because it shows you understand the full recon phase, can code, and think like an attacker. Clean GitHub README + sample report = instant portfolio credibility.',
+  readme:`# AutoRecon-Lite
+
+Automated reconnaissance pipeline for penetration testing engagements.
+
+## What it does
+- Runs Nmap SYN scan + service/version detection + NSE scripts
+- Feeds open web ports to Gobuster (directory bruteforce)
+- Runs Nikto on discovered web services  
+- Parses all outputs into a structured Markdown report
+- Colour-coded terminal output with severity indicators
+
+## Usage
+\`\`\`bash
+python3 autorecon.py -t 10.10.10.1 -o ./reports/
+python3 autorecon.py -t targets.txt --threads 5
+\`\`\`
+
+## Sample output
+See /sample-report/ for a full example report on a VulnHub machine.
+
+## Tech stack
+Python 3, subprocess, argparse, python-nmap
+
+## Disclaimer
+Authorised use only. Run only against systems you own or have explicit permission to test.`},
+
+  {id:'corsscan',tier:'tier1',name:'CORS Misconfiguration Scanner',impact:5,difficulty:2,time:'1 week',tags:['Python','HTTP','Web Security'],type:'tool',
+  desc:'A focused scanner that tests a list of URLs for common CORS misconfigurations: arbitrary origin reflection, null origin acceptance, wildcard with credentials, and subdomain trust. Outputs a CSV report with severity ratings.',
+  why:'CORS misconfigs are one of the most reported web findings on HackerOne. Writing your own scanner proves you understand the vulnerability at the HTTP header level — not just how to click a Burp button. Highly memorable in interviews.',
+  readme:`# CORS-Scanner
+
+Detects CORS misconfigurations across a list of target URLs.
+
+## Tests performed
+- Arbitrary origin reflection (attacker.com → trusted?)
+- Null origin acceptance
+- Wildcard (*) with Access-Control-Allow-Credentials: true
+- Subdomain trust bypass (evil.target.com)
+- HTTP origin accepted for HTTPS target
+
+## Usage
+\`\`\`bash
+python3 cors_scan.py -u https://target.com/api/
+python3 cors_scan.py -l urls.txt -o report.csv
+\`\`\`
+
+## Output
+CSV with: URL, test type, injected origin, reflected origin, credentials, severity (High/Med/Info)
+
+## Tech stack
+Python 3, requests, argparse, csv`},
+
+  {id:'jwtattack',tier:'tier1',name:'JWT Attack Toolkit',impact:5,difficulty:3,time:'1–2 weeks',tags:['Python','JWT','Auth Bypass','Cryptography'],type:'tool',
+  desc:'Automated JWT vulnerability tester. Given a JWT token, it tests: (1) none algorithm attack — strip signature and set alg to none; (2) weak secret brute-force against a wordlist; (3) RS256 → HS256 confusion attack using the server\'s public key as the HMAC secret. Reports which attacks succeed.',
+  why:'JWTs are in almost every modern API. This project proves you understand cryptography, authentication flaws, and the OWASP API Security Top 10. It will come up in every AppSec interview.',
+  readme:`# JWT-Attack-Toolkit
+
+Automated tester for common JWT vulnerabilities.
+
+## Attacks implemented
+1. **None algorithm** — strips signature, sets alg: none
+2. **Weak secret brute-force** — tests against wordlist (rockyou subset)
+3. **Algorithm confusion (RS256 → HS256)** — uses public key as HMAC secret
+4. **kid injection** — SQL/path traversal in kid header parameter
+
+## Usage
+\`\`\`bash
+python3 jwt_attack.py --token "eyJ..." --url https://api.target.com/profile
+python3 jwt_attack.py --token "eyJ..." --wordlist rockyou.txt
+\`\`\`
+
+## Tech stack
+Python 3, PyJWT, requests, argparse`},
+
+  {id:'subdomain',tier:'tier2',name:'Subdomain Takeover Finder',impact:5,difficulty:3,time:'2 weeks',tags:['Python','DNS','OSINT','Bug Bounty'],type:'tool',
+  desc:'Enumerates subdomains via crt.sh certificate transparency logs + DNS brute-force, then checks each for dangling CNAME records pointing to unclaimed services (GitHub Pages, Heroku, Netlify, AWS S3, Fastly). Flags takeover candidates with service fingerprints.',
+  why:'Subdomain takeover is a real bug bounty category with High severity ratings. Finding even one on a VDP program and submitting a proper report is resume gold. This tool makes you look like a researcher, not a script kiddie.',
+  readme:`# SubTakeover
+
+Finds subdomain takeover vulnerabilities via dangling DNS records.
+
+## Pipeline
+1. Enumerate subdomains (crt.sh + optional wordlist brute-force)
+2. Resolve DNS → find CNAMEs pointing to external services
+3. Fingerprint each service (GitHub Pages, Heroku, S3, Netlify, Fastly...)
+4. Check if the external resource is unclaimed
+5. Report takeover candidates with evidence and severity
+
+## Usage
+\`\`\`bash
+python3 subtakeover.py -d target.com
+python3 subtakeover.py -d target.com --brute wordlists/subdomains.txt
+\`\`\`
+
+## Tech stack
+Python 3, requests, dnspython, crt.sh API`},
+
+  {id:'ssrfprobe',tier:'tier2',name:'SSRF Probe',impact:4,difficulty:4,time:'2–3 weeks',tags:['Python','Burp Suite','SSRF','OOB'],type:'tool',
+  desc:'A Burp Suite extension (Jython) or standalone Python script that automatically inserts SSRF payloads (internal IPs, cloud metadata endpoints, OOB callback URLs) into every parameter and header in a captured HTTP request. Uses a built-in callback server to detect out-of-band interactions.',
+  why:'SSRF is in the OWASP Top 10 and is one of the highest-impact bug bounty findings (often Critical in cloud environments). Having your own SSRF tool instead of relying on Burp Collaborator shows real depth.',
+  readme:`# SSRF-Probe
+
+Automated SSRF payload injector with OOB callback detection.
+
+## Payloads tested
+- Internal network: 127.0.0.1, 169.254.169.254 (AWS metadata)
+- Cloud metadata: GCP, Azure, DigitalOcean endpoints
+- OOB: your callback server (built-in or Burp Collaborator)
+- Protocol variations: http://, https://, ftp://, file://
+
+## Usage
+\`\`\`bash
+# Standalone mode — reads Burp-exported request file
+python3 ssrf_probe.py -r request.txt --callback http://your-vps.com:8080
+
+# With built-in callback server
+python3 ssrf_probe.py -r request.txt --listen 0.0.0.0:8080
+\`\`\`
+
+## Tech stack
+Python 3, requests, threading, http.server`},
+
+  {id:'vulnapp',tier:'tier2',name:'VulnLab — Deliberately Vulnerable Flask App',impact:4,difficulty:3,time:'2 weeks',tags:['Python','Flask','MySQL','Security Research'],type:'webapp',
+  desc:'A deliberately vulnerable web app with 6+ real vulnerabilities: SQL injection, IDOR, broken authentication, stored XSS, SSRF, and insecure direct object references. Ship the app AND a full professional pentest report (PDF) on it — as if it were a client engagement.',
+  why:'This is a portfolio piece and a learning tool in one. You can share both publicly. The pentest report proves you can communicate findings professionally — which is 50% of a pentest job. Interviewers can also ask you to walk through your findings live.',
+  readme:`# VulnLab
+
+A deliberately vulnerable Flask web application for security training.
+
+## Vulnerabilities included
+1. SQL Injection — login bypass + data extraction
+2. IDOR — access other users' data by changing user ID
+3. Stored XSS — in user profile and comments
+4. Broken Authentication — weak session tokens, no rate limiting  
+5. SSRF — in image fetch functionality
+6. Sensitive data exposure — debug endpoints, verbose errors
+
+## Pentest report
+See /report/vulnlab-pentest-report.pdf — full professional report
+with executive summary, CVSS scores, evidence, and remediation.
+
+## Setup
+\`\`\`bash
+docker-compose up
+# Access at http://localhost:5000
+\`\`\`
+
+## ⚠️ Warning
+Never deploy this publicly. For local lab use only.`},
+
+  {id:'cverepr',tier:'tier3',name:'CVE Reproduction + Write-up',impact:5,difficulty:4,time:'2–3 weeks per CVE',tags:['Research','Docker','Exploit Dev','Writing'],type:'research',
+  desc:'Pick a recent CVE in a popular open-source app (WordPress plugin, GitLab, Jenkins, etc.). Set it up in Docker, reproduce the exploit from scratch, write a detailed technical blog post covering: vuln root cause, exploit chain, PoC code, and remediation. Publish on Medium.',
+  why:'One published CVE reproduction with a quality write-up is worth five generic projects. It proves you can read security advisories, understand vulnerability root causes, and communicate technically. Recruiters at serious security firms look for this specifically.',
+  readme:`# CVE-YYYY-XXXXX Reproduction
+
+Reproduction and analysis of CVE-YYYY-XXXXX in [Application Name].
+
+## Vulnerability summary
+- **Type:** [e.g. Remote Code Execution via SSTI]
+- **CVSS Score:** X.X (Critical/High/Medium)
+- **Affected versions:** <= X.X.X
+- **Fixed in:** X.X.X+1
+
+## Environment setup
+\`\`\`bash
+docker pull vulnapp:affected-version
+docker run -p 8080:80 vulnapp:affected-version
+\`\`\`
+
+## Root cause analysis
+[Explain WHY the vulnerability exists at the code level]
+
+## Exploit chain
+[Step-by-step reproduction with screenshots]
+
+## PoC
+\`\`\`python
+# Minimal PoC code
+\`\`\`
+
+## Remediation
+[What the patch actually changed]
+
+## Full write-up
+https://medium.com/@bbmajhi/cve-yyyy-xxxxx-analysis`},
+
+  {id:'adlab',tier:'tier3',name:'Active Directory Attack Lab',impact:5,difficulty:5,time:'3–4 weeks',tags:['Windows','PowerShell','BloodHound','Kerberos','AD'],type:'lab',
+  desc:'Set up a Windows AD lab (2 VMs: Domain Controller + workstation). Document the full attack chain: initial foothold → enumeration with BloodHound → Kerberoasting → Pass-the-Hash → lateral movement → Domain Admin. Write it up as a professional report.',
+  why:'AD attacks appear in almost every senior pentester interview in India. Even having a basic documented lab shows you are serious. This is the project that separates "I did TryHackMe" from "I understand enterprise attacks."',
+  readme:`# Active Directory Attack Lab
+
+Home lab setup and attack documentation for Windows AD environments.
+
+## Lab architecture
+- DC01: Windows Server 2019 (Domain Controller)
+- WS01: Windows 10 (workstation, domain joined)
+- Attacker: Kali Linux
+
+## Attack chain documented
+1. Network enumeration (Nmap, enum4linux)
+2. SMB enumeration and null sessions
+3. BloodHound AD enumeration
+4. Kerberoasting — extract and crack service account hashes
+5. Pass-the-Hash lateral movement
+6. DCSync — extract all hashes from DC
+7. Golden Ticket persistence
+
+## Tools used
+BloodHound, SharpHound, Impacket, CrackMapExec,
+Rubeus, Mimikatz, PowerView
+
+## Setup guide
+See /setup/README.md for full lab build instructions.`}
+];
+
+// ─── INTERVIEW QA DATA ─────────────────────
+const QA=[
+  {cat:'web',q:'What is IDOR and how would you test for it?',a:'IDOR (Insecure Direct Object Reference) is when an app exposes internal object references (user IDs, file names, order numbers) in URLs or parameters without proper authorisation checks. To test: log in as User A, capture a request that references your own object (e.g. GET /api/orders/<code>123</code>), then change the ID to another value while still authenticated as User A. If you get another user\'s data — it\'s a valid IDOR. Look in: URL path params, query strings, POST body, JSON fields, cookies, and hidden form fields. Always test both numeric IDs and GUIDs — GUIDs are not a security control.'},
+  {cat:'web',q:'Explain the difference between stored, reflected, and DOM-based XSS.',a:'<strong>Stored XSS</strong>: payload is saved to the database and served to every user who loads that page. Highest severity — no victim interaction needed beyond visiting the page. <strong>Reflected XSS</strong>: payload is in the request (URL param, form field), reflected immediately in the response. Requires tricking the victim into clicking a crafted link. <strong>DOM-based XSS</strong>: the vulnerability is entirely in client-side JavaScript — the server never sees the payload. The JS reads from <code>location.hash</code>, <code>document.referrer</code>, etc. and writes to the DOM unsafely via <code>innerHTML</code>. Hardest to detect with scanners because it doesn\'t appear in the server response.'},
+  {cat:'web',q:'What is SSRF? Give a real-world impact example.',a:'Server-Side Request Forgery — the server makes an HTTP request to a URL controlled by the attacker. Impact example: on AWS, if you make the server request <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code> you get temporary IAM credentials for the EC2 instance role — potentially with S3, RDS, or Lambda access. That\'s a Critical finding. Also used for: internal port scanning, reading local files via <code>file://</code>, attacking internal services (Redis, Elasticsearch), bypassing firewalls to reach admin panels.'},
+  {cat:'web',q:'Walk me through a SQL injection test on a login form.',a:'1. Try a single quote <code>\'</code> in the username — look for a database error. 2. Try <code>admin\'--</code> — the <code>--</code> comments out the password check. 3. Try <code>admin\' OR \'1\'=\'1\'--</code> — always-true condition. 4. For blind SQLi (no error visible): time-based — <code>admin\' AND SLEEP(5)--</code>, boolean-based — change one character and compare responses. 5. Use sqlmap for automation once you confirm injection: <code>sqlmap -u "http://target.com/login" --data "user=admin&pass=test" -p user</code>. Always check: what database? (MySQL, MSSQL, Oracle each have different syntax).'},
+  {cat:'web',q:'What is CORS and when does a misconfiguration become exploitable?',a:'CORS (Cross-Origin Resource Sharing) controls which origins can read responses from a server via browser JS. A misconfiguration is exploitable when the server: (1) reflects arbitrary origins in <code>Access-Control-Allow-Origin</code> AND (2) sets <code>Access-Control-Allow-Credentials: true</code>. This lets an attacker\'s site make authenticated requests to the victim API and read the response. Not exploitable if credentials are false, or if ACAO is a static wildcard (*) — browsers block credentials with wildcards. Test: send <code>Origin: https://evil.com</code> in the request, check if it\'s reflected in the response with credentials allowed.'},
+  {cat:'network',q:'Explain the TCP three-way handshake and how SYN scanning exploits it.',a:'Normal handshake: Client sends SYN → Server replies SYN-ACK → Client sends ACK → connection established. Nmap SYN scan (<code>-sS</code>): sends SYN, waits for SYN-ACK (port open) or RST (port closed). Crucially, it never sends the final ACK — it sends RST instead, so the connection never fully opens. This means: (1) faster than full connect scan, (2) less likely to appear in application logs since no full connection was made, (3) requires raw socket privileges (root/sudo). A filtered port returns nothing or an ICMP unreachable — indicating a firewall.'},
+  {cat:'network',q:'What is the difference between IDS and IPS? How would you evade an IDS?',a:'IDS (Intrusion Detection System) monitors and alerts — it doesn\'t block. IPS (Intrusion Prevention System) sits inline and actively drops/blocks malicious traffic. Evasion techniques: (1) <strong>Fragmentation</strong> — split payloads across packets so the IDS can\'t reassemble them. (2) <strong>Encryption</strong> — HTTPS/TLS hides payload content from network-level IDS. (3) <strong>Slow scans</strong> — <code>nmap --scan-delay 5s</code> to stay under rate thresholds. (4) <strong>Decoys</strong> — <code>nmap -D RND:10</code> spoofs source IPs. (5) <strong>Protocol anomalies</strong> — craft packets that exploit parser differences between IDS and target OS.'},
+  {cat:'network',q:'What does Nmap\'s -A flag do and when would you use it?',a:'<code>-A</code> enables: OS detection (<code>-O</code>), service/version detection (<code>-sV</code>), script scanning (<code>-sC</code> — default NSE scripts), and traceroute. Use it when you want comprehensive info in one scan. Caveat: it\'s noisy — generates significantly more traffic than a basic scan and will trigger IDS. For stealth, split it: first <code>-sS -p-</code> to find open ports quietly, then <code>-sV -sC -p 22,80,443</code> only on open ports. In a CTF or lab — just use <code>-A</code> freely.'},
+  {cat:'concepts',q:'What is the OWASP Top 10? Name at least 5 and explain one in depth.',a:'Current OWASP Top 10 (2021): A01 Broken Access Control, A02 Cryptographic Failures, A03 Injection (SQLi, XSS, etc.), A04 Insecure Design, A05 Security Misconfiguration, A06 Vulnerable Components, A07 Auth Failures, A08 Software/Data Integrity Failures, A09 Security Logging Failures, A10 SSRF. In depth — <strong>A01 Broken Access Control</strong>: the most common finding. Includes IDOR, privilege escalation, CORS misconfig, missing function-level access control, and forceful browsing. Example: a regular user accessing <code>/admin/users</code> because the frontend hides the link but the backend never checks the role. Fix: server-side authorisation on every endpoint, deny by default.'},
+  {cat:'concepts',q:'Explain the CIA triad with a pentesting example for each.',a:'<strong>Confidentiality</strong>: protecting data from unauthorised access. Pentest example: extracting password hashes via SQLi proves a confidentiality failure. <strong>Integrity</strong>: ensuring data isn\'t tampered with. Example: if an attacker can modify a price parameter in a POST request (<code>price=1</code>) and the server accepts it, that\'s an integrity failure. <strong>Availability</strong>: keeping systems accessible. Example: a DoS via resource exhaustion (slow HTTP headers, XML bomb) breaks availability. A good pentest report maps every finding to the CIA element it impacts.'},
+  {cat:'concepts',q:'What is the difference between a vulnerability, an exploit, and a payload?',a:'<strong>Vulnerability</strong>: a weakness in a system — e.g. an unpatched buffer overflow in a service. <strong>Exploit</strong>: code or technique that takes advantage of the vulnerability — e.g. the specific sequence of bytes that triggers the overflow. <strong>Payload</strong>: what executes after the exploit succeeds — e.g. a reverse shell, a meterpreter session, or just a command. In Metasploit terms: you select an exploit module, then a payload to deliver via that exploit. The vulnerability exists independently of whether anyone exploits it.'},
+  {cat:'tools',q:'Walk me through your Burp Suite workflow when testing a web app.',a:'1. <strong>Scope</strong>: define the target domain in scope, set proxy to 127.0.0.1:8080. 2. <strong>Spider/crawl</strong>: use Burp crawler to discover all endpoints, or manually browse with intercept on. 3. <strong>Passive scan</strong>: review flagged issues in the dashboard. 4. <strong>Manual testing</strong>: use Repeater to modify requests and observe responses. Use Intruder for parameter fuzzing (but it\'s slow on Community — use FFUF instead). 5. <strong>Active scan</strong>: for known vulnerability patterns. 6. Key extensions: Logger++, Autorize (tests authorisation), param miner (discovers hidden params), JWT Editor. Always check: request headers (auth tokens, cookies), response headers (CORS, CSP, HSTS), error messages.'},
+  {cat:'tools',q:'What is Metasploit and how does a basic exploit workflow look?',a:'Metasploit is a penetration testing framework with modules for exploits, payloads, auxiliary tools, and post-exploitation. Basic workflow: <code>msfconsole</code> → <code>search vsftpd</code> → <code>use exploit/unix/ftp/vsftpd_234_backdoor</code> → <code>show options</code> → <code>set RHOSTS 10.10.10.3</code> → <code>set payload cmd/unix/interact</code> → <code>run</code>. After shell: <code>sessions -l</code> to list, <code>sessions -i 1</code> to interact. For meterpreter: <code>sysinfo</code>, <code>getuid</code>, <code>hashdump</code>, <code>upload/download</code>. Key point for interviews: understand what each module type does — exploit, auxiliary (scanner/fuzzer), post (privilege escalation, persistence), payload (what runs on target).'},
+  {cat:'tools',q:'How do you use Nmap for service enumeration? Give your go-to command.',a:'My standard workflow: (1) Fast all-ports scan: <code>nmap -sS -p- --min-rate 5000 -T4 10.10.10.x -oN ports.txt</code> (2) Targeted service scan on open ports: <code>nmap -sV -sC -p 22,80,443,8080 10.10.10.x -oN services.txt</code> Key flags: <code>-sV</code> version detection, <code>-sC</code> default scripts, <code>-O</code> OS detection, <code>-oN/-oX/-oG</code> output formats. Useful scripts: <code>--script=http-enum</code> (web paths), <code>--script=smb-enum-shares</code>, <code>--script=vuln</code> (known vulns). For HTB: always do the full port range — machines often have services on non-standard ports.'},
+  {cat:'behavioral',q:'Tell me about a security project you built. Walk me through it.',a:'This is your Shhlert / AutoRecon-Lite / CORS Scanner moment. Structure your answer: (1) <strong>Problem</strong>: what gap or pain point did you see? (2) <strong>What you built</strong>: brief technical description. (3) <strong>How it works</strong>: the interesting technical parts — be specific. (4) <strong>Result/Impact</strong>: what it proved or achieved. (5) <strong>What you\'d improve</strong>: shows self-awareness. Never just describe what a tool does — explain WHY you built it and WHAT you learned. Keep it to 2 minutes, then offer to demo or share the GitHub link.'},
+  {cat:'behavioral',q:'How do you stay current with new vulnerabilities and techniques?',a:'Be specific — generic answers are red flags. Good answer: "I follow security researchers on Twitter/X — people like @NahamSec, @hacks_zach, @samwcyo for bug bounty, @_xpn_ for red team techniques. I read Portswigger research blog for new web vulns, subscribe to the weekly tl;dr sec newsletter, and track NVD for new CVEs in software I\'m studying. When something interesting comes up — like a new bypass technique for a WAF or a new JWT attack — I reproduce it in my lab and write a short note on it. I\'m also active on TryHackMe and HTB which keeps practical skills sharp."'},
+  {cat:'behavioral',q:'What is the difference between a pentest and a vulnerability assessment?',a:'<strong>Vulnerability assessment</strong>: systematic scanning and identification of vulnerabilities — stops at discovery. Uses automated tools (Nessus, OpenVAS) primarily. Produces a list of vulnerabilities with severity ratings. Tells you WHAT is vulnerable. <strong>Penetration test</strong>: goes further — actually exploits vulnerabilities to demonstrate real impact. Chains findings together (vuln A gives access that enables vuln B). Tells you WHAT IS EXPLOITABLE and WHAT AN ATTACKER COULD DO. Key difference: a VA might find that RDP is open; a pentest would attempt to brute-force it, then use those credentials to pivot internally. Always clarify which the client wants — scope creep is a legal risk.'}
+];
+
+// ─── STATE ─────────────────────────────────
+let checks=JSON.parse(localStorage.getItem('bbm-checks')||'{}');
+let pocs=JSON.parse(localStorage.getItem('bbm-pocs')||'[]');
+let pocFilter='all';
+let ideaFilter='all';
+
+// ─── NAV ───────────────────────────────────
+function goto(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+
+// ─── ROADMAP ───────────────────────────────
+function buildRoadmap(){
+  const c=document.getElementById('phases-container');c.innerHTML='';
+  PHASES.forEach(ph=>{
+    const allItems=ph.sections.flatMap(s=>s.items);
+    const done=allItems.filter((_,i)=>checks[ph.id+'-'+i]).length;
+    const pct=Math.round(done/allItems.length*100);
+    const div=document.createElement('div');
+    div.className='phase-item'+(ph.current?' active-phase':'');
+    div.id='phase-'+ph.id;
+    let sectHtml='';let gi=0;
+    ph.sections.forEach(sec=>{
+      sectHtml+=`<div class="phase-section"><div class="phase-section-label">${sec.label}</div><ul class="checklist">`;
+      sec.items.forEach(item=>{
+        const key=ph.id+'-'+gi;const d=checks[key];
+        sectHtml+=`<li class="${d?'done':''}"><input type="checkbox" ${d?'checked':''} onchange="toggleCheck('${key}','${ph.id}',this)" ><span>${item}</span></li>`;
+        gi++;
+      });
+      sectHtml+='</ul></div>';
+    });
+    div.innerHTML=`<div class="phase-head" onclick="togglePhase('${ph.id}')">
+      <span class="phase-badge" style="background:${ph.color};color:${ph.textColor}">${ph.label}</span>
+      <div style="flex:1"><div class="phase-name">${ph.name}${ph.current?'<span class="badge-current">current</span>':''}</div><div class="phase-meta">${ph.sub}</div></div>
+      <div style="text-align:right;margin-right:10px;min-width:90px">
+        <div style="font-size:12px;color:${ph.textColor};font-family:'JetBrains Mono',monospace;margin-bottom:4px">${done}/${allItems.length} done</div>
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%;background:${ph.textColor}"></div></div>
+      </div>
+      <div class="phase-chevron" id="chev-${ph.id}">›</div>
+    </div>
+    <div class="phase-body${ph.current?' open':''}" id="body-${ph.id}">${sectHtml}<div class="tip-box">${ph.tip}</div></div>`;
+    c.appendChild(div);
+    if(ph.current)document.getElementById('chev-'+ph.id).style.transform='rotate(90deg)';
+  });
+  updateStats();
+}
+function togglePhase(id){
+  const b=document.getElementById('body-'+id),ch=document.getElementById('chev-'+id);
+  const o=b.classList.toggle('open');ch.style.transform=o?'rotate(90deg)':'';
+}
+function toggleCheck(key,phaseId,el){
+  checks[key]=el.checked;localStorage.setItem('bbm-checks',JSON.stringify(checks));
+  el.parentElement.className=el.checked?'done':'';
+  const ph=PHASES.find(p=>p.id===phaseId);
+  const all=ph.sections.flatMap(s=>s.items);
+  const done=all.filter((_,i)=>checks[phaseId+'-'+i]).length;
+  const pct=Math.round(done/all.length*100);
+  const bar=document.querySelector('#phase-'+phaseId+' .progress-fill');
+  if(bar)bar.style.width=pct+'%';
+  updateStats();
+}
+function updateStats(){
+  let total=0,done=0;
+  PHASES.forEach(ph=>{const all=ph.sections.flatMap(s=>s.items);total+=all.length;done+=all.filter((_,i)=>checks[ph.id+'-'+i]).length;});
+  document.getElementById('stat-done').textContent=done;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-pct').textContent=Math.round(done/total*100)+'%';
+  for(const ph of PHASES){const all=ph.sections.flatMap(s=>s.items);const pd=all.filter((_,i)=>checks[ph.id+'-'+i]).length;if(pd<all.length){document.getElementById('stat-phase').textContent=ph.label;break;}}
+}
+
+// ─── POC IDEAS ─────────────────────────────
+function buildIdeas(){
+  const list=document.getElementById('ideas-list');
+  const filtered=ideaFilter==='all'?IDEAS:IDEAS.filter(i=>i.tier===ideaFilter);
+  const tierColors={tier1:'--green',tier2:'--amber',tier3:'--purple'};
+  const tierLabels={tier1:'Tier 1 — Build now',tier2:'Tier 2 — M3–4',tier3:'Tier 3 — M5–6'};
+  list.innerHTML=filtered.map(idea=>{
+    const stars='★'.repeat(idea.impact)+'☆'.repeat(5-idea.impact);
+    const dots=Array.from({length:5},(_,i)=>`<span class="diff-dot${i<idea.difficulty?' filled':''}"></span>`).join('');
+    const tags=idea.tags.map(t=>`<span class="tag tag-dim">${t}</span>`).join('');
+    const tc=tierColors[idea.tier]||'--green';
+    return `<div class="poc-idea-card ${idea.tier}" id="idea-${idea.id}">
+      <div class="poc-idea-head">
+        <div style="min-width:28px;padding-top:2px"><span style="width:10px;height:10px;border-radius:50%;background:var(${tc});display:inline-block"></span></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <span class="poc-idea-title">${idea.name}</span>
+            <span class="tag tag-dim" style="font-size:10px">${tierLabels[idea.tier]}</span>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:4px;font-size:11px;color:var(--muted);align-items:center;flex-wrap:wrap">
+            <span title="Impact"><span class="impact-stars">${stars}</span> impact</span>
+            <span>Difficulty: <span class="difficulty-bar" style="display:inline-flex">${dots}</span></span>
+            <span>⏱ ${idea.time}</span>
+          </div>
+        </div>
+      </div>
+      <div class="poc-idea-desc">${idea.desc}</div>
+      <div style="margin-left:40px;margin-bottom:10px;background:var(--bg3);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--teal);border-left:2px solid var(--teal2)">
+        <strong style="color:var(--muted);font-weight:500">Why this matters:</strong> ${idea.why}
+      </div>
+      <div class="poc-idea-meta">${tags}</div>
+      <div class="poc-idea-actions">
+        <button class="btn btn-accent" onclick="addIdeaToTracker('${idea.id}')">+ Add to My Projects</button>
+        <button class="btn btn-blue" onclick="toggleReadme('${idea.id}')">📄 README template</button>
+      </div>
+      <div class="readme-box" id="readme-${idea.id}">${idea.readme}</div>
+    </div>`;
+  }).join('');
+}
+function filterIdeas(f,btn){
+  ideaFilter=f;
+  document.querySelectorAll('[id^=fi-]').forEach(b=>{b.classList.remove('btn-accent');});
+  if(btn)btn.classList.add('btn-accent');
+  buildIdeas();
+}
+function toggleReadme(id){
+  const box=document.getElementById('readme-'+id);
+  box.classList.toggle('open');
+}
+function addIdeaToTracker(id){
+  const idea=IDEAS.find(i=>i.id===id);if(!idea)return;
+  if(pocs.find(p=>p.name===idea.name)){alert('Already in your projects!');return;}
+  pocs.unshift({id:Date.now().toString(),name:idea.name,type:idea.type,status:'in-progress',desc:idea.desc,tech:idea.tags.join(', '),link:'',created:Date.now()});
+  localStorage.setItem('bbm-pocs',JSON.stringify(pocs));
+  alert('Added to My Projects! Switch to the My Projects tab.');
+}
+
+// ─── POC TRACKER ───────────────────────────
+function renderPocList(){
+  const list=document.getElementById('poc-list');
+  const filtered=pocFilter==='all'?pocs:pocs.filter(p=>p.status===pocFilter);
+  if(!filtered.length){list.innerHTML=`<div class="empty-state"><div class="icon">📂</div>No projects here yet.<br>Add from the PoC Ideas tab or click "+ Add project".</div>`;return;}
+  const typeColors={tool:'blue',webapp:'purple',lab:'green',bounty:'red',report:'amber',research:'teal',cve:'purple'};
+  const statusColors={'in-progress':'amber',done:'green',published:'blue'};
+  list.innerHTML=filtered.map(p=>{
+    const tc=typeColors[p.type]||'dim',sc=statusColors[p.status]||'dim';
+    const techTags=p.tech?p.tech.split(',').map(t=>`<span class="tag tag-dim">${t.trim()}</span>`).join(''):'';
+    return `<div class="poc-card">
+      <button class="poc-delete" onclick="deletePoc('${p.id}')" title="Delete">×</button>
+      <div class="poc-card-head"><div class="poc-title">${p.name}</div></div>
+      <div class="poc-desc">${p.desc||'No description yet.'}</div>
+      <div class="poc-meta">
+        <span class="tag tag-${tc}">${p.type}</span>
+        <span class="tag tag-${sc}">${p.status}</span>
+        ${techTags}
+        ${p.link?`<a href="${p.link}" target="_blank" class="tag tag-dim" style="text-decoration:none">🔗 link</a>`:''}
+      </div>
+      <div class="poc-actions">
+        <button class="btn" onclick="editPoc('${p.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterPoc(f){
+  pocFilter=f;
+  document.querySelectorAll('[id^=f-]').forEach(b=>{b.style.borderColor='';b.style.color='';});
+  const btn=document.getElementById('f-'+f);
+  if(btn){btn.style.borderColor='var(--accent)';btn.style.color='var(--accent)';}
+  renderPocList();
+}
+function openPocModal(id){
+  document.getElementById('poc-edit-id').value=id||'';
+  if(id){const p=pocs.find(x=>x.id===id);document.getElementById('poc-name').value=p.name;document.getElementById('poc-type').value=p.type;document.getElementById('poc-status').value=p.status;document.getElementById('poc-desc').value=p.desc||'';document.getElementById('poc-tech').value=p.tech||'';document.getElementById('poc-link').value=p.link||'';}
+  else{['poc-name','poc-desc','poc-tech','poc-link'].forEach(i=>document.getElementById(i).value='');document.getElementById('poc-type').value='tool';document.getElementById('poc-status').value='in-progress';}
+  document.getElementById('poc-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('poc-name').focus(),100);
+}
+function closePocModal(){document.getElementById('poc-modal').classList.remove('open');}
+function savePoc(){
+  const name=document.getElementById('poc-name').value.trim();if(!name){document.getElementById('poc-name').focus();return;}
+  const id=document.getElementById('poc-edit-id').value;
+  const data={id:id||Date.now().toString(),name,type:document.getElementById('poc-type').value,status:document.getElementById('poc-status').value,desc:document.getElementById('poc-desc').value.trim(),tech:document.getElementById('poc-tech').value.trim(),link:document.getElementById('poc-link').value.trim(),created:id?(pocs.find(p=>p.id===id)?.created||Date.now()):Date.now()};
+  if(id){const idx=pocs.findIndex(p=>p.id===id);pocs[idx]=data;}else{pocs.unshift(data);}
+  localStorage.setItem('bbm-pocs',JSON.stringify(pocs));
+  closePocModal();renderPocList();
+}
+function editPoc(id){openPocModal(id);}
+function deletePoc(id){if(!confirm('Delete this project?'))return;pocs=pocs.filter(p=>p.id!==id);localStorage.setItem('bbm-pocs',JSON.stringify(pocs));renderPocList();}
+
+// ─── LATEX EXPORT ──────────────────────────
+function exportLatex(){
+  const done=pocs.filter(p=>p.status==='done'||p.status==='published');
+  if(!done.length){alert('Mark at least one project as Done or Published first.');return;}
+  const items=done.map(p=>`\\resumeProjectHeading
+    {\\textbf{${p.name}} $|$ \\emph{${p.tech||''}}}{${p.status==='published'?'Published':'Completed'}}
+    \\resumeItemListStart
+      \\resumeItem{${p.desc||'Security project.'}}
+      ${p.link?`\\resumeItem{\\href{${p.link}}{\\underline{GitHub / Write-up}}}`:''} 
+    \\resumeItemListEnd`).join('\n\n');
+  const latex=`%% ─── PROJECTS SECTION ─── paste into your Overleaf resume ───
+%% Generated by BBM Security HQ on ${new Date().toLocaleDateString()}
+
+\\section{Projects}
+\\resumeSubHeadingListStart
+
+${items}
+
+\\resumeSubHeadingListEnd`;
+  const blob=new Blob([latex],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='bbm_projects_latex.tex';a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── INTERVIEW QA ──────────────────────────
+function buildQA(filter){
+  const list=document.getElementById('qa-list');
+  const filtered=filter==='all'?QA:QA.filter(q=>q.cat===filter);
+  const catColors={web:'blue',network:'green',concepts:'purple',tools:'amber',behavioral:'teal'};
+  list.innerHTML=filtered.map((q,i)=>`
+    <div class="qa-card">
+      <div class="qa-q" onclick="toggleQA(${i},'${filter}')">
+        <span>${q.q}</span>
+        <span class="tag tag-${catColors[q.cat]||'dim'}" style="flex-shrink:0">${q.cat}</span>
+      </div>
+      <div class="qa-a" id="qa-a-${i}-${filter}">${q.a}</div>
+    </div>`).join('');
+}
+function toggleQA(i,filter){
+  const el=document.getElementById('qa-a-'+i+'-'+filter);if(el)el.classList.toggle('open');
+}
+function filterQA(f,btn){
+  document.querySelectorAll('#page-interview .btn').forEach(b=>b.classList.remove('btn-accent'));
+  if(btn)btn.classList.add('btn-accent');
+  buildQA(f);
+}
+
+// modal overlay click to close
+document.getElementById('poc-modal').addEventListener('click',function(e){if(e.target===this)closePocModal();});
+
+// ─── INIT ──────────────────────────────────
+buildRoadmap();
+buildIdeas();
+renderPocList();
+buildQA('all');
+</script>
+</body>
+</html>
